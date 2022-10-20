@@ -1,0 +1,42 @@
+plugins {
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(project(":lib")) {
+        // TODO: This is verbose and hard to find and reason about
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EMBEDDED))
+        }
+    }
+    implementation 'com.google.guava:guava:30.1-jre'
+}
+
+configurations {
+    compileClasspath {
+        resolutionStrategy {
+            // TODO: This is annoying to set for all configurations
+            // How do we know which configurations to set?
+            capabilitiesResolution {
+                // Why is version ignored?
+                withCapability("com.google.guava:guava:31.0.1-jre") {
+                    // TODO: How do you really select from these candidates?
+                    select(candidates[1])
+                    because("Fat wins")
+                }
+                // TODO: This only occurs when there's a conflict with guava
+                // This doesn't seem necessary. apiElements shouldn't be considered
+                // No one should expect to do this
+                withCapability("com.example:lib") {
+      //              println candidates
+                    select(candidates[0])
+                    because("somethings broke")
+                }
+            }
+        }
+    }
+}
